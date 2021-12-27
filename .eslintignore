@@ -1,0 +1,4 @@
+**/tests/*.ts
+src/public/
+build.ts
+src/node_modules/**
