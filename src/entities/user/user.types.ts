@@ -7,7 +7,6 @@ export interface User extends Document {
     password: string;
     roles: Roles[];
     createdAt: Date;
-    updatedAt: Date;
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
 

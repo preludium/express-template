@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import { ObjectId } from 'mongoose';
 
 import config from '@config';
 import { User } from '@entities/user';
@@ -7,7 +6,7 @@ import { User } from '@entities/user';
 import Logger from '../logger';
 
 interface JWTPayload {
-    id: ObjectId;
+    id: string;
     iat: number;
 }
 
@@ -18,10 +17,9 @@ export const signToken = (
     keyName: 'ACCESS_TOKEN' | 'REFRESH_TOKEN',
     options?: jwt.SignOptions | undefined
 ) => {
-    logger.info(keyName);
     const privateKey = config[`${keyName}_PRIVATE_KEY`];
     const expiresIn = config[`${keyName}_VALIDITY`];
-    logger.info(expiresIn);
+
     return jwt.sign({ id: object._id }, privateKey, {
         ...(options && options),
         expiresIn,
@@ -32,7 +30,7 @@ export const signToken = (
 export const verifyToken = async (
     token: string,
     keyName: 'ACCESS_TOKEN' | 'REFRESH_TOKEN'
-): Promise<ObjectId> => {
+): Promise<string> => {
     const publicKey = config[`${keyName}_PUBLIC_KEY`];
 
     try {

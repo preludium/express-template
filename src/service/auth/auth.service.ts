@@ -4,17 +4,19 @@ import { LoginUserRequestBody } from '@controller/auth/types';
 import UserModel, { User, UserRequest, UserResponse } from '@entities/user';
 import { Roles } from '@utils/constants';
 import Logger from '@utils/logger';
-import { signToken, verifyToken } from '@utils/middlewares';
+import { verifyToken } from '@utils/middlewares';
+import { TokenBundle } from '@utils/types/token';
 
-import { LoginHandlerReturn } from './types';
+import TokenService from '../token/token.service';
 
 class AuthService {
     private users = UserModel;
+    private tokenService = new TokenService();
     private logger = Logger.create(__filename);
 
     public async processLogin({
         email, password
-    }: LoginUserRequestBody): Promise<LoginHandlerReturn> {
+    }: LoginUserRequestBody): Promise<TokenBundle> {
         const retrievedUser = await this.users.findOne({ email })
             .then(user => {
                 if (user === null) {
@@ -31,13 +33,7 @@ class AuthService {
             throw new Error('Password is not correct');
         }
 
-        const accessToken = signToken(retrievedUser, 'ACCESS_TOKEN');
-        const refreshToken = signToken(retrievedUser, 'REFRESH_TOKEN');
-
-        return {
-            accessToken,
-            refreshToken
-        };
+        return await this.tokenService.generateTokens(retrievedUser);
     }
 
     public handleAuthenticate(token: string): Promise<User> {
